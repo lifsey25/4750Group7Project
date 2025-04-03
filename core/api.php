@@ -1,29 +1,36 @@
 <?php
 function getProducts() {
 	$response = file_get_contents('https://fakestoreapi.com/products');
-	return json_decode($response, true);
+	$products = json_decode($response, true) ?? [];
+
+	if(file_exists('products.json')) {
+		$localProducts = json_decode(file_get_contents('products.json'), true) ?? [];
+		$products = array_merge($localProducts, $products);
+	}
+
+	return $products;
 }
 
 function addProduct($title, $price, $description, $category) {
-	$data = [
-		'title' => $title,
-		'price' => $price,
-		'description' => $description,
-		'category' => $category
-	];
+    $newProduct = [
+        'id' => time(),  // Unique ID using timestamp
+        'title' => $title,
+        'price' => $price,
+        'description' => $description,
+        'category' => $category
+    ];
 
-	$options = [
-		'http' => [
-			'header' => "Content-Type: application/json",
-			'method' => 'POST',
-			'content' => json_encode($data)
-		]
-];
+    // Save locally
+    $localProducts = [];
+    if (file_exists('products.json')) {
+        $localProducts = json_decode(file_get_contents('products.json'), true) ?? [];
+    }
+    
+    $localProducts[] = $newProduct;
+    file_put_contents('products.json', json_encode($localProducts, JSON_PRETTY_PRINT));
 
-	$context = stream_context_create($options);
-	$response = file_get_contents('https://fakestoreapi.com/products', false, $context);
-	
-	return json_decode($response, true);
+    return $newProduct;
 }
+
 ?>
 
