@@ -1,14 +1,10 @@
 <?php
+require 'db.php';
+
 function getProducts() {
-	$response = file_get_contents('https://fakestoreapi.com/products');
-	$products = json_decode($response, true) ?? [];
-
-	if(file_exists('products.json')) {
-		$localProducts = json_decode(file_get_contents('products.json'), true) ?? [];
-		$products = array_merge($localProducts, $products);
-	}
-
-	return $products;
+    global $pdo;
+    $stmt = $pdo->query("SELECT * FROM Product");
+    return $stmt->fetchAll();
 }
 
 function addProduct($title, $price, $description, $category) {

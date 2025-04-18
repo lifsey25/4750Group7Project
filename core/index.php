@@ -5,8 +5,8 @@ $products = getProducts();
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Test</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Product List</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Products</h1>
@@ -14,9 +14,9 @@ $products = getProducts();
     <div class="products">
         <?php foreach ($products as $product): ?>
             <div class="product">
-                <h2><?= htmlspecialchars($product['title']) ?></h2>
-                <p><?= htmlspecialchars($product['description']) ?></p>
-                <strong>$<?= htmlspecialchars($product['price']) ?></strong>
+                <h2><?= htmlspecialchars($product['product_name']) ?></h2>
+                <p>In Stock: <?= htmlspecialchars($product['product_in_stock']) ?></p>
+                <strong>$<?= htmlspecialchars($product['product_price']) ?></strong>
             </div>
         <?php endforeach; ?>
     </div>

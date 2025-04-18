@@ -1,33 +1,32 @@
 <?php
-require 'api.php';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
- 	$title = $_POST['title'] ?? '';
-	$price = $_POST['price'] ?? '';
-	$description = $_POST['description'] ?? '';
-	$category = $_POST['category'] ?? 'electronics';
+require 'db.php';
 
-	$response = addProduct($title, $price, $description, $category);
-	if ($response) {
-		header('Location: index.php');
-		exit;
-	} else {
-		echo "Error adding product.";
-							        }
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $name = $_POST['product_name'] ?? '';
+    $price = $_POST['product_price'] ?? 0;
+    $stock = $_POST['product_in_stock'] ?? 0;
+
+    $stmt = $pdo->prepare("INSERT INTO Product (product_name, product_price, product_in_stock) VALUES (?, ?, ?)");
+    $stmt->execute([$name, $price, $stock]);
+
+    header('Location: index.php');
+    exit;
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Add Product</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Add a New Product</h1>
-    <form method="POST" action="">
-        <label>Title: <input type="text" name="title" required></label><br>
-        <label>Price: <input type="number" step="0.01" name="price" required></label><br>
-        <label>Description: <textarea name="description" required></textarea></label><br>
-        <label>Category: <input type="text" name="category" value="electronics"></label><br>
-        <button type="submit">Add Product</button>
+    <h1>Add Product</h1>
+    <form method="POST">
+        <label>Product Name:<br><input name="product_name" required></label><br><br>
+        <label>Price:<br><input name="product_price" type="number" step="0.01" required></label><br><br>
+        <label>Stock Quantity:<br><input name="product_in_stock" type="number" required></label><br><br>
+        <button type="submit">Add</button>
     </form>
 </body>
 </html>
