@@ -1,3 +1,5 @@
+-- Initialize with 'mysql -u root -p < easyship_schema.sql'
+
 CREATE DATABASE IF NOT EXISTS easyship;
 USE easyship;
 
