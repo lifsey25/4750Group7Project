@@ -1,4 +1,12 @@
 <?php
+session_start();
+
+// Require login
+if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
+    header('Location: login.php');
+    exit;
+}
+
 require 'api.php';
 $products = getProducts();
 ?>
@@ -10,6 +18,7 @@ $products = getProducts();
 </head>
 <body>
     <h1>Products</h1>
+    <p>Welcome, <?= htmlspecialchars($_SESSION['username']) ?>! <a href="logout.php">Logout</a></p>
     <a href="add_product.php">Add Product</a>
     <div class="products">
         <?php foreach ($products as $product): ?>
