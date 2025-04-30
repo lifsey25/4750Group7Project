@@ -1,19 +1,51 @@
 <?php
 session_start();
+require 'db.php';
 
-// Hardcoded default user
-$defaultUser = 'user';
+$error = '';
+$mode = $_POST['mode'] ?? 'login';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'] ?? '';
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
 
-    if ($username === $defaultUser) {
-        $_SESSION['logged_in'] = true;
-        $_SESSION['username'] = $username;
-        header('Location: index.php');
-        exit;
+    if ($mode === 'register') {
+        $first = trim($_POST['first_name'] ?? '');
+        $last = trim($_POST['last_name'] ?? '');
+        $address = trim($_POST['address'] ?? '');
+        $phone = trim($_POST['phone'] ?? '');
+        $zipcode = null; // temporary: not handling zipcode input yet
+
+        // Check if username exists
+        $stmt = $pdo->prepare("SELECT * FROM Users WHERE username = ?");
+        $stmt->execute([$username]);
+        if ($stmt->fetch()) {
+            $error = "Username already exists.";
+        } else {
+            $hashed = hash('sha256', $password);
+            $stmt = $pdo->prepare("INSERT INTO Users (username, first_name, last_name, address, zipcode, phone, password)
+                                   VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$username, $first, $last, $address, $zipcode, $phone, $hashed]);
+
+            $_SESSION['logged_in'] = true;
+            $_SESSION['username'] = $username;
+            header('Location: index.php');
+            exit;
+        }
     } else {
-        $error = "Invalid username.";
+        $hashed = hash('sha256', $password);
+        $stmt = $pdo->prepare("SELECT * FROM Users WHERE username = ? AND password = ?");
+        $stmt->execute([$username, $hashed]);
+        $user = $stmt->fetch();
+
+        if ($user) {
+            $_SESSION['logged_in'] = true;
+            $_SESSION['username'] = $username;
+            header('Location: index.php');
+            exit;
+        } else {
+            $error = "Invalid username or password.";
+        }
     }
 }
 ?>
@@ -21,15 +53,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Login</title>
+    <title><?= $mode === 'register' ? 'Register' : 'Login' ?></title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 5% auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .login-container input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0 16px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        .toggle-link {
+            margin-top: 20px;
+        }
+        .error {
+            color: red;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body>
-    <h1>Login</h1>
-    <?php if (!empty($error)) echo "<p style='color:red;'>$error</p>"; ?>
-    <form method="POST">
-        <label>Username:<br><input type="text" name="username" required></label><br><br>
-        <button type="submit">Login</button>
-    </form>
+    <div class="login-container">
+        <h2><?= $mode === 'register' ? 'Register' : 'Login' ?></h2>
+        <?php if (!empty($error)) echo "<div class='error'>$error</div>"; ?>
+        <form method="POST">
+            <input type="hidden" name="mode" value="<?= htmlspecialchars($mode) ?>">
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+
+            <?php if ($mode === 'register'): ?>
+                <input type="text" name="first_name" placeholder="First Name" required>
+                <input type="text" name="last_name" placeholder="Last Name" required>
+                <input type="text" name="address" placeholder="Address" required>
+                <input type="text" name="phone" placeholder="Phone" required>
+                <!-- Future: add zipcode input -->
+            <?php endif; ?>
+
+            <button type="submit"><?= $mode === 'register' ? 'Register' : 'Login' ?></button>
+        </form>
+
+        <div class="toggle-link">
+            <form method="POST">
+                <input type="hidden" name="mode" value="<?= $mode === 'register' ? 'login' : 'register' ?>">
+                <button type="submit">
+                    <?= $mode === 'register' ? 'Already have an account? Login' : 'Create an account' ?>
+                </button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>
