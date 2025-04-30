@@ -23,7 +23,7 @@ $products = getProducts();
 <body>
     <h1>Products</h1>
     <p>Welcome, <?= htmlspecialchars($_SESSION['username']) ?>! <a href="logout.php">Logout</a></p>
-    <a href="add_product.php">Add Product</a>
+    <a href="cart.php">View Cart</a>
     <div class="products">
         <?php foreach ($products as $product): ?>
             <div class="product">

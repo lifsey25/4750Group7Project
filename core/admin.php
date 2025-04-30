@@ -9,12 +9,23 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true || $_SESSI
 require 'db.php';
 
 // Handle product deletion
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_id'])) {
-    $delete_id = (int)$_POST['delete_id'];
-    $stmt = $pdo->prepare("DELETE FROM Product WHERE product_id = ?");
-    $stmt->execute([$delete_id]);
-    header("Location: admin.php");
-    exit;
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['delete_id'])) {
+        $delete_id = (int)$_POST['delete_id'];
+        $stmt = $pdo->prepare("DELETE FROM Product WHERE product_id = ?");
+        $stmt->execute([$delete_id]);
+        header("Location: admin.php");
+        exit;
+    } elseif (isset($_POST['product_name'], $_POST['product_price'], $_POST['product_in_stock'])) {
+        $name = $_POST['product_name'];
+        $price = $_POST['product_price'];
+        $stock = $_POST['product_in_stock'];
+
+        $stmt = $pdo->prepare("INSERT INTO Product (product_name, product_price, product_in_stock) VALUES (?, ?, ?)");
+        $stmt->execute([$name, $price, $stock]);
+        header("Location: admin.php");
+        exit;
+    }
 }
 
 // Fetch products
@@ -67,6 +78,16 @@ $products = $stmt->fetchAll();
                 </div>
             <?php endforeach; ?>
         <?php endif; ?>
+    </div>
+
+    <div class="product-list">
+        <h2>Add New Product</h2>
+        <form method="POST">
+            <input name="product_name" placeholder="Product Name" required><br><br>
+            <input name="product_price" placeholder="Price" type="number" step="0.01" required><br><br>
+            <input name="product_in_stock" placeholder="Stock Quantity" type="number" required><br><br>
+            <button type="submit">Add Product</button>
+        </form>
     </div>
 
     <div style="text-align:center; margin-top:30px;">
