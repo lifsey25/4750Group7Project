@@ -5,6 +5,9 @@ require 'db.php';
 $error = '';
 $mode = $_POST['mode'] ?? 'login';
 
+$admin_user = 'admin';
+$admin_pass = 'adminpass';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = $_POST['password'] ?? '';
@@ -14,9 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $last = trim($_POST['last_name'] ?? '');
         $address = trim($_POST['address'] ?? '');
         $phone = trim($_POST['phone'] ?? '');
-        $zipcode = null; // temporary: not handling zipcode input yet
+        $zipcode = null; // or hardcode a valid one like 12345 if inserted
 
-        // Check if username exists
         $stmt = $pdo->prepare("SELECT * FROM Users WHERE username = ?");
         $stmt->execute([$username]);
         if ($stmt->fetch()) {
@@ -29,10 +31,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $_SESSION['logged_in'] = true;
             $_SESSION['username'] = $username;
+            $_SESSION['role'] = 'user';
             header('Location: index.php');
             exit;
         }
     } else {
+        // Check hardcoded admin first
+        if ($username === $admin_user && $password === $admin_pass) {
+            $_SESSION['logged_in'] = true;
+            $_SESSION['username'] = $admin_user;
+            $_SESSION['role'] = 'admin';
+            header('Location: index.php');
+            exit;
+        }
+
+        // Check database users
         $hashed = hash('sha256', $password);
         $stmt = $pdo->prepare("SELECT * FROM Users WHERE username = ? AND password = ?");
         $stmt->execute([$username, $hashed]);
@@ -41,6 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($user) {
             $_SESSION['logged_in'] = true;
             $_SESSION['username'] = $username;
+            $_SESSION['role'] = 'user';
             header('Location: index.php');
             exit;
         } else {
@@ -95,7 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <input type="text" name="last_name" placeholder="Last Name" required>
                 <input type="text" name="address" placeholder="Address" required>
                 <input type="text" name="phone" placeholder="Phone" required>
-                <!-- Future: add zipcode input -->
             <?php endif; ?>
 
             <button type="submit"><?= $mode === 'register' ? 'Register' : 'Login' ?></button>

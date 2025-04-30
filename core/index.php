@@ -7,6 +7,10 @@ if (!isset($_SESSION['logged_in']) || $_SESSION['logged_in'] !== true) {
     exit;
 }
 
+if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
+    echo '<p><a href="admin.php">Go to Admin Panel</a></p>';
+}
+
 require 'api.php';
 $products = getProducts();
 ?>
