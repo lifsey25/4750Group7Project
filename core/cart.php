@@ -44,7 +44,7 @@ if (!empty($_SESSION['cart'])) {
 <html lang="en">
 <head>
     <title>Your Cart</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
     <h1>Your Cart</h1>

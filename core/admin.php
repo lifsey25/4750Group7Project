@@ -37,7 +37,7 @@ $products = $stmt->fetchAll();
 <html lang="en">
 <head>
     <title>Admin Panel</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./css/style.css">
     <style>
         .product-list {
             max-width: 800px;
